@@ -142,8 +142,7 @@ public class EasyMapper
 
         var genericTypeDef = type.GetGenericTypeDefinition();
         return genericTypeDef == typeof(List<>) || 
-               genericTypeDef == typeof(IList<>) ||
-               (type.IsInterface && type.GetGenericTypeDefinition() == typeof(IList<>));
+               genericTypeDef == typeof(IList<>);
     }
 
     private static bool IsGenericDictionary(Type type)
