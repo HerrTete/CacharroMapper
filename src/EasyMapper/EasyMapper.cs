@@ -33,10 +33,11 @@ public class EasyMapper
         if (targetType.IsAssignableFrom(valueType))
             return value;
 
-        // Handle generic collections (List<T>, IEnumerable<T>, etc.)
-        if (IsGenericCollection(targetType) && IsGenericCollection(valueType))
+        // Handle generic collections (List<T>, IEnumerable<T>, arrays, etc.)
+        if (IsEnumerableType(targetType, out var targetElementType) && 
+            IsEnumerableType(valueType, out var sourceElementType))
         {
-            return MapCollection(value, targetType);
+            return MapCollection(value, targetType, targetElementType!);
         }
 
         // Handle complex objects (nested mapping)
@@ -50,17 +51,47 @@ public class EasyMapper
         return value;
     }
 
-    private static bool IsGenericCollection(Type type)
+    private static bool IsEnumerableType(Type type, out Type? elementType)
     {
-        return type.IsGenericType && 
-               (type.GetGenericTypeDefinition() == typeof(List<>) ||
-                type.GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
-                type.GetGenericTypeDefinition() == typeof(ICollection<>));
+        elementType = null;
+
+        // Check if it's an array
+        if (type.IsArray)
+        {
+            elementType = type.GetElementType();
+            return elementType != null;
+        }
+
+        // Check if it's a generic type
+        if (type.IsGenericType)
+        {
+            var genericTypeDef = type.GetGenericTypeDefinition();
+            if (genericTypeDef == typeof(List<>) ||
+                genericTypeDef == typeof(IEnumerable<>) ||
+                genericTypeDef == typeof(ICollection<>) ||
+                genericTypeDef == typeof(IList<>))
+            {
+                elementType = type.GetGenericArguments()[0];
+                return true;
+            }
+        }
+
+        // Check if it implements IEnumerable<T>
+        var enumerableInterface = type.GetInterfaces()
+            .FirstOrDefault(i => i.IsGenericType && 
+                                i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+        
+        if (enumerableInterface != null)
+        {
+            elementType = enumerableInterface.GetGenericArguments()[0];
+            return true;
+        }
+
+        return false;
     }
 
-    private static object MapCollection(object sourceCollection, Type targetType)
+    private static object MapCollection(object sourceCollection, Type targetType, Type targetElementType)
     {
-        var targetElementType = targetType.GetGenericArguments()[0];
         var listType = typeof(List<>).MakeGenericType(targetElementType);
         var targetList = (System.Collections.IList)Activator.CreateInstance(listType)!;
 
