@@ -54,4 +54,4 @@ jobs:
     # Publish to GitHub Packages (Release only, main branch)
     - name: Publish NuGet package to GitHub Packages
       if: matrix.configuration == 'Release' && github.event_name == 'push' && github.ref == 'refs/heads/main'
-      run: dotnet nuget push "nupkg/*.nupkg" --source "https://nuget.pkg.github.com/HerrTete/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+      run: dotnet nuget push "**/*.nupkg" --source "https://nuget.pkg.github.com/HerrTete/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
