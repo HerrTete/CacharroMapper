@@ -164,6 +164,23 @@ public class EasyMapperTests
     }
 }
 
+[TestClass]
+public class EasyMapperWithNameMappingTests
+{
+    [TestMethod]
+    public void Map_ObjectWithDifferentPropertyNames()
+    {
+        var source = new { FirstName = "John", Years = 30 };
+        var target = EasyMapper.Map<SimpleTarget>(source, new List<PropertyNameMapping>
+        {
+            new PropertyNameMapping { SourcePropertyName = "FirstName", TargetPropertyName = "Name" },
+            new PropertyNameMapping { SourcePropertyName = "Years", TargetPropertyName = "Age" }
+         });
+        Assert.AreEqual("John", target.Name); // Assuming we have a mapping for FirstName -> Name
+        Assert.AreEqual(30, target.Age); // Assuming we have a mapping for Years -> Age
+    }
+}
+
 public class SimpleSource
 {
     public string Name { get; set; }

@@ -1,10 +1,10 @@
-using System.Collections;
+﻿using System.Collections;
 
 namespace EasyMapper;
 
 public class EasyMapper
 {
-    public static T Map<T>(object source) where T : new()
+    public static T Map<T>(object source, List<PropertyNameMapping>? propertyNameMappings = null) where T : new()
     {
         var target = new T();
         var sourceType = source.GetType();
