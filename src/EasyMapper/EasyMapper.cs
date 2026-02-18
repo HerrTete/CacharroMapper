@@ -48,28 +48,40 @@ public class EasyMapper
 
         var sourceType = value.GetType();
 
-        // If types match or target type is assignable from source type (for primitive types and strings)
-        if (targetType.IsAssignableFrom(sourceType))
+        // Handle enum mapping by name
+        if (sourceType.IsEnum && targetType.IsEnum)
         {
-            return value;
+            var enumName = value.ToString() ?? string.Empty;
+            if (Enum.IsDefined(targetType, enumName))
+            {
+                return Enum.Parse(targetType, enumName);
+            }
+            // If the enum name doesn't exist in target, return the default value
+            return Activator.CreateInstance(targetType)!;
         }
 
-        // Handle arrays
+        // Handle arrays (must be before IsAssignableFrom check)
         if (targetType.IsArray && sourceType.IsArray)
         {
             return MapArray(value, targetType);
         }
 
-        // Handle IList<T> and List<T>
+        // Handle IList<T> and List<T> (must be before IsAssignableFrom check)
         if (IsGenericList(targetType) && IsGenericList(sourceType))
         {
             return MapList(value, targetType);
         }
 
-        // Handle Dictionary<TKey, TValue>
+        // Handle Dictionary<TKey, TValue> (must be before IsAssignableFrom check)
         if (IsGenericDictionary(targetType) && IsGenericDictionary(sourceType))
         {
             return MapDictionary(value, targetType);
+        }
+
+        // If types match or target type is assignable from source type (for primitive types and strings)
+        if (targetType.IsAssignableFrom(sourceType))
+        {
+            return value;
         }
 
         // Handle complex objects (nested mapping)

@@ -241,3 +241,132 @@ public class TargetWithIList
     public string? Name { get; set; }
     public IList<SimpleTarget>? Items { get; set; }
 }
+
+[TestClass]
+public class EasyMapperEnumTests
+{
+    [TestMethod]
+    public void Map_EnumByName_SameEnumType()
+    {
+        var source = new SourceWithEnum { Name = "Test", Status = SourceStatus.Active };
+        var target = EasyMapper.Map<TargetWithEnum>(source);
+        Assert.AreEqual("Test", target.Name);
+        Assert.AreEqual(TargetStatus.Active, target.Status);
+    }
+
+    [TestMethod]
+    public void Map_EnumByName_DifferentEnumTypes()
+    {
+        var source = new SourceWithEnum { Name = "Test", Status = SourceStatus.Inactive };
+        var target = EasyMapper.Map<TargetWithEnum>(source);
+        Assert.AreEqual("Test", target.Name);
+        Assert.AreEqual(TargetStatus.Inactive, target.Status);
+    }
+
+    [TestMethod]
+    public void Map_EnumByName_WithDifferentIntValues()
+    {
+        // SourceStatus.Pending has value 2, TargetStatus.Pending has value 10
+        var source = new SourceWithEnum { Name = "Test", Status = SourceStatus.Pending };
+        var target = EasyMapper.Map<TargetWithEnum>(source);
+        Assert.AreEqual("Test", target.Name);
+        Assert.AreEqual(TargetStatus.Pending, target.Status);
+        // Verify that we're mapping by name, not by int value
+        Assert.AreEqual((int)TargetStatus.Pending, 10);
+        Assert.AreNotEqual((int)SourceStatus.Pending, (int)TargetStatus.Pending);
+    }
+
+    [TestMethod]
+    public void Map_EnumByName_NonExistentValue()
+    {
+        var source = new SourceWithEnum { Name = "Test", Status = SourceStatus.Archived };
+        var target = EasyMapper.Map<TargetWithEnum>(source);
+        Assert.AreEqual("Test", target.Name);
+        // Should map to default value (first enum value) when name doesn't exist
+        Assert.AreEqual(default(TargetStatus), target.Status);
+    }
+
+    [TestMethod]
+    public void Map_ObjectWithEnumArray()
+    {
+        var source = new SourceWithEnumArray
+        {
+            Name = "Test",
+            Statuses = new[] { SourceStatus.Active, SourceStatus.Pending, SourceStatus.Inactive }
+        };
+        var target = EasyMapper.Map<TargetWithEnumArray>(source);
+        Assert.AreEqual("Test", target.Name);
+        Assert.IsNotNull(target.Statuses);
+        Assert.AreEqual(3, target.Statuses.Length);
+        Assert.AreEqual(TargetStatus.Active, target.Statuses[0]);
+        Assert.AreEqual(TargetStatus.Pending, target.Statuses[1]);
+        Assert.AreEqual(TargetStatus.Inactive, target.Statuses[2]);
+    }
+
+    [TestMethod]
+    public void Map_ObjectWithEnumList()
+    {
+        var source = new SourceWithEnumList
+        {
+            Name = "Test",
+            Statuses = new List<SourceStatus> { SourceStatus.Active, SourceStatus.Inactive }
+        };
+        var target = EasyMapper.Map<TargetWithEnumList>(source);
+        Assert.AreEqual("Test", target.Name);
+        Assert.IsNotNull(target.Statuses);
+        Assert.AreEqual(2, target.Statuses.Count);
+        Assert.AreEqual(TargetStatus.Active, target.Statuses[0]);
+        Assert.AreEqual(TargetStatus.Inactive, target.Statuses[1]);
+    }
+}
+
+public enum SourceStatus
+{
+    Active = 0,
+    Inactive = 1,
+    Pending = 2,
+    Archived = 3
+}
+
+public enum TargetStatus
+{
+    Active = 0,
+    Inactive = 1,
+    Pending = 10  // Different int value than SourceStatus.Pending
+}
+
+public class SourceWithEnum
+{
+    public string? Name { get; set; }
+    public SourceStatus Status { get; set; }
+}
+
+public class TargetWithEnum
+{
+    public string? Name { get; set; }
+    public TargetStatus Status { get; set; }
+}
+
+public class SourceWithEnumArray
+{
+    public string? Name { get; set; }
+    public SourceStatus[]? Statuses { get; set; }
+}
+
+public class TargetWithEnumArray
+{
+    public string? Name { get; set; }
+    public TargetStatus[]? Statuses { get; set; }
+}
+
+public class SourceWithEnumList
+{
+    public string? Name { get; set; }
+    public List<SourceStatus>? Statuses { get; set; }
+}
+
+public class TargetWithEnumList
+{
+    public string? Name { get; set; }
+    public List<TargetStatus>? Statuses { get; set; }
+}
