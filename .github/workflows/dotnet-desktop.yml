@@ -36,15 +36,15 @@ jobs:
 
     # Restore dependencies
     - name: Restore dependencies
-      run: dotnet restore EasyMapper.sln
+      run: dotnet restore src/EasyMapper.sln
 
     # Build the solution
     - name: Build
-      run: dotnet build EasyMapper.sln --configuration ${{ matrix.configuration }} --no-restore
+      run: dotnet build src/EasyMapper.sln --configuration ${{ matrix.configuration }} --no-restore
 
     # Execute all unit tests in the solution
     - name: Test
-      run: dotnet test EasyMapper.sln --configuration ${{ matrix.configuration }} --no-build --verbosity normal
+      run: dotnet test src/EasyMapper.sln --configuration ${{ matrix.configuration }} --no-build --verbosity normal
 
     # Pack the NuGet package (Release only)
     - name: Pack NuGet package

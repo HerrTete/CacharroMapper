@@ -49,10 +49,10 @@ jobs:
     # Restore and build the solution
     # CodeQL analyzes the code during the build process
     - name: Restore dependencies
-      run: dotnet restore EasyMapper.sln
+      run: dotnet restore src/EasyMapper.sln
 
     - name: Build solution
-      run: dotnet build EasyMapper.sln --configuration Release --no-restore
+      run: dotnet build src/EasyMapper.sln --configuration Release --no-restore
 
     # Perform CodeQL Analysis
     - name: Perform CodeQL Analysis
