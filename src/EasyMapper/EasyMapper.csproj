@@ -7,7 +7,7 @@
 
     <!-- NuGet Package Properties -->
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageId>EasyMapper</PackageId>
+    <PackageId>HerrTete.EasyMapper</PackageId>
     <Version>1.0.0</Version>
     <Authors>HerrTete</Authors>
     <Company>HerrTete</Company>
@@ -24,3 +24,4 @@
   </ItemGroup>
 
 </Project>
+
