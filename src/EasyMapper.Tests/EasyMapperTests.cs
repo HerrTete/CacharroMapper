@@ -19,8 +19,9 @@ public class EasyMapperTests
         var target = EasyMapper.Map<SimpleTarget>(source);
         Assert.AreEqual("John", target.Name);
         Assert.AreEqual(30, target.Age);
-        Assert.AreEqual("Jane", target.Child!.Name);
-        Assert.AreEqual(5, target.Child!.Age);
+        Assert.IsNotNull(target.Child);
+        Assert.AreEqual("Jane", target.Child.Name);
+        Assert.AreEqual(5, target.Child.Age);
     }
     [TestMethod]
     public void Map_SimpleObjectWithList()
@@ -29,10 +30,12 @@ public class EasyMapperTests
         var target = EasyMapper.Map<SimpleTarget>(source);
         Assert.AreEqual("John", target.Name);
         Assert.AreEqual(30, target.Age);
-        Assert.AreEqual("Jane", target.Child!.Name);
-        Assert.AreEqual(5, target.Child!.Age);
-        Assert.AreEqual("Jack", target.Children![0].Name);
-        Assert.AreEqual(3, target.Children![0].Age);
+        Assert.IsNotNull(target.Child);
+        Assert.AreEqual("Jane", target.Child.Name);
+        Assert.AreEqual(5, target.Child.Age);
+        Assert.IsNotNull(target.Children);
+        Assert.AreEqual("Jack", target.Children[0].Name);
+        Assert.AreEqual(3, target.Children[0].Age);
     }
 
     [TestMethod]
