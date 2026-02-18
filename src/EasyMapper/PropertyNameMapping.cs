@@ -2,6 +2,6 @@ namespace EasyMapper;
 
 public class PropertyNameMapping
 {
-    public string SourcePropertyName { get; set; }
-    public string TargetPropertyName { get; set; }     
+    public string SourcePropertyName { get; set; } = string.Empty;
+    public string TargetPropertyName { get; set; } = string.Empty;
 }
