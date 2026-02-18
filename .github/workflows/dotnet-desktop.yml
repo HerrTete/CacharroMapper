@@ -8,6 +8,10 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
 
   build:
@@ -41,3 +45,13 @@ jobs:
     # Execute all unit tests in the solution
     - name: Test
       run: dotnet test EasyMapper.sln --configuration ${{ matrix.configuration }} --no-build --verbosity normal
+
+    # Pack the NuGet package (Release only)
+    - name: Pack NuGet package
+      if: matrix.configuration == 'Release' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: dotnet pack src/EasyMapper/EasyMapper.csproj --configuration Release --no-build --output ./nupkg
+
+    # Publish to GitHub Packages (Release only, main branch)
+    - name: Publish NuGet package to GitHub Packages
+      if: matrix.configuration == 'Release' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: dotnet nuget push ./nupkg/*.nupkg --source "https://nuget.pkg.github.com/HerrTete/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
