@@ -51,13 +51,13 @@ public class EasyMapper
         // Handle enum mapping by name
         if (sourceType.IsEnum && targetType.IsEnum)
         {
-            var enumName = value.ToString();
-            if (Enum.IsDefined(targetType, enumName!))
+            var enumName = value.ToString() ?? string.Empty;
+            if (Enum.IsDefined(targetType, enumName))
             {
-                return Enum.Parse(targetType, enumName!);
+                return Enum.Parse(targetType, enumName);
             }
             // If the enum name doesn't exist in target, return the default value
-            return Activator.CreateInstance(targetType);
+            return Activator.CreateInstance(targetType)!;
         }
 
         // Handle arrays (must be before IsAssignableFrom check)
