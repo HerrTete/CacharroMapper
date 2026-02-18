@@ -55,6 +55,6 @@ jobs:
     - name: Publish NuGet package to GitHub Packages
       if: matrix.configuration == 'Release' && github.event_name == 'push' && github.ref == 'refs/heads/main'
       run: |
-        Get-ChildItem -Recurse -Filter *.nupkg | ForEach-Object {
+        Get-ChildItem -Recurse -Filter EasyMapper.*.nupkg | ForEach-Object {
           dotnet nuget push $_.FullName --source "https://nuget.pkg.github.com/HerrTete/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
         }
