@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Linq;
 
 namespace EasyMapper;
 
@@ -12,7 +13,18 @@ public class EasyMapper
 
         foreach (var targetProp in targetType.GetProperties())
         {
-            var sourceProp = sourceType.GetProperty(targetProp.Name);
+            // Check if there's a property name mapping for this target property
+            var sourcePropertyName = targetProp.Name;
+            if (propertyNameMappings != null)
+            {
+                var mapping = propertyNameMappings.FirstOrDefault(m => m.TargetPropertyName == targetProp.Name);
+                if (mapping != null)
+                {
+                    sourcePropertyName = mapping.SourcePropertyName;
+                }
+            }
+
+            var sourceProp = sourceType.GetProperty(sourcePropertyName);
             if (sourceProp != null && sourceProp.CanRead && targetProp.CanWrite)
             {
                 var value = sourceProp.GetValue(source);
@@ -61,7 +73,7 @@ public class EasyMapper
         if (targetType.IsClass && targetType != typeof(string))
         {
             var mapMethod = typeof(EasyMapper).GetMethod(nameof(Map))!.MakeGenericMethod(targetType);
-            return mapMethod.Invoke(null, new[] { value });
+            return mapMethod.Invoke(null, new object?[] { value, null });
         }
 
         return value;
