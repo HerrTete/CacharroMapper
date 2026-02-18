@@ -12,7 +12,7 @@ namespace EasyMapper.EasyMapperExtension
                 throw new ArgumentNullException(nameof(source));
             }
 
-            return source.Map<TTarget>();
+            return EasyMapper.Map<TTarget>(source);
         }
     }
 }
