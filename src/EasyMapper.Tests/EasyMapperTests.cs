@@ -19,6 +19,7 @@ public class EasyMapperTests
         var target = EasyMapper.Map<SimpleTarget>(source);
         Assert.AreEqual("John", target.Name);
         Assert.AreEqual(30, target.Age);
+        Assert.IsNotNull(target.Child);
         Assert.AreEqual("Jane", target.Child.Name);
         Assert.AreEqual(5, target.Child.Age);
     }
@@ -29,8 +30,10 @@ public class EasyMapperTests
         var target = EasyMapper.Map<SimpleTarget>(source);
         Assert.AreEqual("John", target.Name);
         Assert.AreEqual(30, target.Age);
+        Assert.IsNotNull(target.Child);
         Assert.AreEqual("Jane", target.Child.Name);
         Assert.AreEqual(5, target.Child.Age);
+        Assert.IsNotNull(target.Children);
         Assert.AreEqual("Jack", target.Children[0].Name);
         Assert.AreEqual(3, target.Children[0].Age);
     }
@@ -183,58 +186,58 @@ public class EasyMapperWithNameMappingTests
 
 public class SimpleSource
 {
-    public string Name { get; set; }
+    public string? Name { get; set; }
     public int Age { get; set; }
 
-    public SimpleSource Child { get; set; }
+    public SimpleSource? Child { get; set; }
 
-    public List<SimpleSource> Children { get; set; }
+    public List<SimpleSource>? Children { get; set; }
 }
 
 public class SimpleTarget
 {
-    public string Name { get; set; }
+    public string? Name { get; set; }
     public int Age { get; set; }
-    public SimpleTarget Child { get; set; }
-    public List<SimpleTarget> Children { get; set; }
+    public SimpleTarget? Child { get; set; }
+    public List<SimpleTarget>? Children { get; set; }
 }
 
 public class SourceWithArray
 {
-    public string Name { get; set; }
-    public int[] Numbers { get; set; }
-    public SimpleSource[] Items { get; set; }
+    public string? Name { get; set; }
+    public int[]? Numbers { get; set; }
+    public SimpleSource[]? Items { get; set; }
 }
 
 public class TargetWithArray
 {
-    public string Name { get; set; }
-    public int[] Numbers { get; set; }
-    public SimpleTarget[] Items { get; set; }
+    public string? Name { get; set; }
+    public int[]? Numbers { get; set; }
+    public SimpleTarget[]? Items { get; set; }
 }
 
 public class SourceWithDictionary
 {
-    public string Name { get; set; }
-    public Dictionary<string, string> Properties { get; set; }
-    public Dictionary<string, SimpleSource> ComplexDictionary { get; set; }
+    public string? Name { get; set; }
+    public Dictionary<string, string>? Properties { get; set; }
+    public Dictionary<string, SimpleSource>? ComplexDictionary { get; set; }
 }
 
 public class TargetWithDictionary
 {
-    public string Name { get; set; }
-    public Dictionary<string, string> Properties { get; set; }
-    public Dictionary<string, SimpleTarget> ComplexDictionary { get; set; }
+    public string? Name { get; set; }
+    public Dictionary<string, string>? Properties { get; set; }
+    public Dictionary<string, SimpleTarget>? ComplexDictionary { get; set; }
 }
 
 public class SourceWithIList
 {
-    public string Name { get; set; }
-    public IList<SimpleSource> Items { get; set; }
+    public string? Name { get; set; }
+    public IList<SimpleSource>? Items { get; set; }
 }
 
 public class TargetWithIList
 {
-    public string Name { get; set; }
-    public IList<SimpleTarget> Items { get; set; }
+    public string? Name { get; set; }
+    public IList<SimpleTarget>? Items { get; set; }
 }
