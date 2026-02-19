@@ -1,4 +1,4 @@
-using CacharroMapper.CacharroMapperExtension;
+using CacharroMapper;
 
 namespace CacharroMapper.Tests;
 
