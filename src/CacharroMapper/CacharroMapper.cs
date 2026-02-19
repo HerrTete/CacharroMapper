@@ -13,6 +13,22 @@ public class CacharroMapper
     public static T Map<T>(object source, List<PropertyNameMapping>? propertyNameMappings = null) where T : new()
     {
         var target = new T();
+
+        // If source is a list/collection, map the first element
+        if (IsGenericList(source.GetType()))
+        {
+            var rawEnumerator = ((IEnumerable)source).GetEnumerator();
+            try
+            {
+                if (!rawEnumerator.MoveNext() || rawEnumerator.Current == null) return target;
+                source = rawEnumerator.Current;
+            }
+            finally
+            {
+                (rawEnumerator as IDisposable)?.Dispose();
+            }
+        }
+
         var sourceType = source.GetType();
         var targetType = typeof(T);
 
