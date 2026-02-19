@@ -687,3 +687,48 @@ public class CacharroMapperCollectionCombinationTests
         Assert.AreEqual(5, target.Items[0].ComplexDictionary["A"].Age);
     }
 }
+
+[TestClass]
+public class CacharroMapperIndexerTests
+{
+    [TestMethod]
+    public void Map_ObjectWithIndexerProperty_ShouldNotThrow()
+    {
+        var source = new SourceWithIndexer { Name = "Test" };
+        var target = CacharroMapper.Map<TargetWithIndexer>(source);
+        Assert.AreEqual("Test", target.Name);
+    }
+
+    [TestMethod]
+    public void Map_ObjectWithIndexerAndReadOnlyIndexer_ShouldNotThrow()
+    {
+        var source = new SourceWithReadOnlyIndexer { Name = "ReadOnly" };
+        var target = CacharroMapper.Map<SimpleTarget>(source);
+        Assert.AreEqual("ReadOnly", target.Name);
+    }
+}
+
+public class SourceWithIndexer
+{
+    public string? Name { get; set; }
+    private readonly string[] _data = ["item0", "item1"];
+    public string this[int index] => _data[index];
+}
+
+public class TargetWithIndexer
+{
+    public string? Name { get; set; }
+    private readonly string[] _data = new string[10];
+    public string this[int index]
+    {
+        get => _data[index];
+        set => _data[index] = value;
+    }
+}
+
+public class SourceWithReadOnlyIndexer
+{
+    public string? Name { get; set; }
+    private readonly string[] _data = ["a", "b"];
+    public string this[int index] => _data[index];
+}
