@@ -5,6 +5,11 @@ namespace CacharroMapper;
 
 public class CacharroMapper
 {
+    public static List<T> MapList<T>(IEnumerable<object> source, List<PropertyNameMapping>? propertyNameMappings = null) where T : new()
+    {
+        return source.Select(item => Map<T>(item, propertyNameMappings)).ToList();
+    }
+
     public static T Map<T>(object source, List<PropertyNameMapping>? propertyNameMappings = null) where T : new()
     {
         var target = new T();
