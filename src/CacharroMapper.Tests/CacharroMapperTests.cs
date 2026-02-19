@@ -1,3 +1,6 @@
+using System.Data.Common;
+using System.Linq.Expressions;
+
 namespace CacharroMapper.Tests;
 
 [TestClass]
@@ -761,5 +764,55 @@ public class CacharroMapperComplexListWithNullValuesTests
         };
         var target = CacharroMapper.Map<TargetWithEnumArray>(source);
         Assert.AreEqual("Test", target.Name);
+    }
+
+    
+    [TestMethod]
+    public void Map_ComplexObjectWithNullValues()
+    {
+        var source = new List<SourcePerson>
+        {
+            new SourcePerson
+            {
+                Name = "Test",
+                Id = 1,
+                Age = -12, // This should not cause an exception
+                Address = new SourceAddress(), // This should not cause an exception
+                Tags = null, // This should not cause an exception
+                Numbers = new List<string> { "one", "two" },
+            }
+        };
+        var target = source.Map<List<TargetPerson>>();
+        Assert.AreEqual(source[0].Name, target[0].Name);
+    }
+
+    public class SourcePerson
+    {
+        public string Name { get; set; }
+        public int Id { get; set; }
+        public int Age { get; set; }
+        public SourceAddress Address { get; set; }
+        public List<string> Tags { get; set; }
+        public List<string> Numbers { get; set; }
+    }
+    public class TargetPerson
+    {
+        public string Name { get; set; }
+        public int Id { get; set; }
+        public int Age { get; set; }
+        public TargetAddress Address { get; set; }
+        public List<string> Tags { get; set; }
+        public List<string> Numbers { get; set; }
+    }
+
+    public class SourceAddress
+    {
+        public string? Street { get; set; }
+        public string? City { get; set; }
+    }
+    public class TargetAddress
+    {
+        public string? Street { get; set; }
+        public string? City { get; set; }
     }
 }

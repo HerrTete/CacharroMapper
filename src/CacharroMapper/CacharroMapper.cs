@@ -7,15 +7,35 @@ public class CacharroMapper
 {
     public static List<T> MapList<T>(IEnumerable<object> source, List<PropertyNameMapping>? propertyNameMappings = null) where T : new()
     {
-        return source.Select(item => Map<T>(item, propertyNameMappings)).ToList();
+        var result = new List<T>();
+        foreach (var item in source)
+        {
+            if (item == null)
+            {
+                result.Add(default!);
+            }
+            else
+            {
+                result.Add(Map<T>(item, propertyNameMappings));
+            }
+        }
+        return result;
     }
 
     public static T Map<T>(object source, List<PropertyNameMapping>? propertyNameMappings = null) where T : new()
     {
         var target = new T();
+        var sourceType = source.GetType();
+        var targetType = typeof(T);
 
-        // If source is a list/collection, map the first element
-        if (IsGenericList(source.GetType()))
+        // If source is a list/collection and target is also a list/collection, map the list
+        if (IsGenericList(sourceType) && IsGenericList(targetType))
+        {
+            return MapListToList<T>(source, targetType, propertyNameMappings);
+        }
+
+        // If source is a list/collection but target is not, map the first element
+        if (IsGenericList(sourceType))
         {
             var rawEnumerator = ((IEnumerable)source).GetEnumerator();
             try
@@ -27,10 +47,8 @@ public class CacharroMapper
             {
                 (rawEnumerator as IDisposable)?.Dispose();
             }
+            sourceType = source.GetType();
         }
-
-        var sourceType = source.GetType();
-        var targetType = typeof(T);
 
         // Convert property name mappings to dictionary for O(1) lookups
         Dictionary<string, string>? mappingDict = null;
@@ -54,7 +72,7 @@ public class CacharroMapper
                 && targetProp.GetIndexParameters().Length == 0)
             {
                 var value = sourceProp.GetValue(source);
-                var mappedValue = MapValue(value, targetProp.PropertyType);
+                var mappedValue = MapValue(value, targetProp.PropertyType, propertyNameMappings);
                 targetProp.SetValue(target, mappedValue);
             }
         }
@@ -62,7 +80,7 @@ public class CacharroMapper
         return target;
     }
 
-    private static object? MapValue(object? value, Type targetType)
+    private static object? MapValue(object? value, Type targetType, List<PropertyNameMapping>? propertyNameMappings = null)
     {
         if (value == null)
         {
@@ -111,13 +129,13 @@ public class CacharroMapper
         if (targetType.IsClass && targetType != typeof(string))
         {
             var mapMethod = typeof(CacharroMapper).GetMethod(nameof(Map))!.MakeGenericMethod(targetType);
-            return mapMethod.Invoke(null, new object?[] { value, null });
+            return mapMethod.Invoke(null, new object?[] { value, propertyNameMappings });
         }
 
         return value;
     }
 
-    private static object MapArray(object sourceArray, Type targetType)
+    private static object MapArray(object sourceArray, Type targetType, List<PropertyNameMapping>? propertyNameMappings = null)
     {
         var sourceArr = (Array)sourceArray;
         var targetElementType = targetType.GetElementType()!;
@@ -126,14 +144,14 @@ public class CacharroMapper
         for (int i = 0; i < sourceArr.Length; i++)
         {
             var sourceElement = sourceArr.GetValue(i);
-            var mappedElement = MapValue(sourceElement, targetElementType);
+            var mappedElement = MapValue(sourceElement, targetElementType, propertyNameMappings);
             targetArr.SetValue(mappedElement, i);
         }
 
         return targetArr;
     }
 
-    private static object MapList(object sourceList, Type targetType)
+    private static object MapList(object sourceList, Type targetType, List<PropertyNameMapping>? propertyNameMappings = null)
     {
         var sourceEnumerable = (IEnumerable)sourceList;
         var targetGenericArgs = targetType.GetGenericArguments();
@@ -155,14 +173,14 @@ public class CacharroMapper
 
         foreach (var sourceElement in sourceEnumerable)
         {
-            var mappedElement = MapValue(sourceElement, targetElementType);
+            var mappedElement = MapValue(sourceElement, targetElementType, propertyNameMappings);
             targetList.Add(mappedElement);
         }
 
         return targetList;
     }
 
-    private static object MapDictionary(object sourceDictionary, Type targetType)
+    private static object MapDictionary(object sourceDictionary, Type targetType, List<PropertyNameMapping>? propertyNameMappings = null)
     {
         var sourceDict = (IDictionary)sourceDictionary;
         var targetGenericArgs = targetType.GetGenericArguments();
@@ -175,12 +193,31 @@ public class CacharroMapper
 
         foreach (DictionaryEntry entry in sourceDict)
         {
-            var mappedKey = MapValue(entry.Key, targetKeyType);
-            var mappedValue = MapValue(entry.Value, targetValueType);
+            var mappedKey = MapValue(entry.Key, targetKeyType, propertyNameMappings);
+            var mappedValue = MapValue(entry.Value, targetValueType, propertyNameMappings);
             targetDict.Add(mappedKey!, mappedValue);
         }
 
         return targetDict;
+    }
+
+    private static T MapListToList<T>(object sourceList, Type targetType, List<PropertyNameMapping>? propertyNameMappings) where T : new()
+    {
+        var sourceEnumerable = (IEnumerable)sourceList;
+        var targetGenericArgs = targetType.GetGenericArguments();
+        var targetElementType = targetGenericArgs[0];
+
+        // Create the target list
+        Type listType = typeof(List<>).MakeGenericType(targetElementType);
+        var targetList = (IList)Activator.CreateInstance(listType)!;
+
+        foreach (var sourceElement in sourceEnumerable)
+        {
+            var mappedElement = MapValue(sourceElement, targetElementType, propertyNameMappings);
+            targetList.Add(mappedElement);
+        }
+
+        return (T)(object)targetList;
     }
 
     private static bool IsGenericList(Type type)
