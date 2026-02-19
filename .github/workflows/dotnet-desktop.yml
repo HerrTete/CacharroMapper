@@ -58,3 +58,11 @@ jobs:
         Get-ChildItem -Recurse -Filter HerrTete.CacharroMapper.*.nupkg | ForEach-Object {
           dotnet nuget push $_.FullName --source "https://nuget.pkg.github.com/HerrTete/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
         }
+
+    # Publish to nuget.org (Release only, main branch)
+    - name: Publish NuGet package to nuget.org
+      if: matrix.configuration == 'Release' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        Get-ChildItem -Recurse -Filter HerrTete.CacharroMapper.*.nupkg | ForEach-Object {
+          dotnet nuget push $_.FullName --source "https://api.nuget.org/v3/index.json" --api-key ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+        }
