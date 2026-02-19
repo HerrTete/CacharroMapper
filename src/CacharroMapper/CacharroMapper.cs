@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Linq;
 
-namespace EasyMapper;
+namespace CacharroMapper;
 
-public class EasyMapper
+public class CacharroMapper
 {
     public static T Map<T>(object source, List<PropertyNameMapping>? propertyNameMappings = null) where T : new()
     {
@@ -87,7 +87,7 @@ public class EasyMapper
         // Handle complex objects (nested mapping)
         if (targetType.IsClass && targetType != typeof(string))
         {
-            var mapMethod = typeof(EasyMapper).GetMethod(nameof(Map))!.MakeGenericMethod(targetType);
+            var mapMethod = typeof(CacharroMapper).GetMethod(nameof(Map))!.MakeGenericMethod(targetType);
             return mapMethod.Invoke(null, new object?[] { value, null });
         }
 

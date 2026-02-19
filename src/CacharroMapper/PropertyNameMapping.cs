@@ -1,4 +1,4 @@
-namespace EasyMapper;
+namespace CacharroMapper;
 
 public class PropertyNameMapping
 {
