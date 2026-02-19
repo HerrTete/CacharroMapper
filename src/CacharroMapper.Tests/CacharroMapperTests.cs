@@ -4,6 +4,22 @@ namespace CacharroMapper.Tests;
 public class CacharroMapperTests
 {
     [TestMethod]
+    public void MapList_ListOfObjects()
+    {
+        var sources = new List<SimpleSource>
+        {
+            new SimpleSource { Name = "John", Age = 30 },
+            new SimpleSource { Name = "Jane", Age = 25 }
+        };
+        var targets = CacharroMapper.MapList<SimpleTarget>(sources);
+        Assert.AreEqual(2, targets.Count);
+        Assert.AreEqual("John", targets[0].Name);
+        Assert.AreEqual(30, targets[0].Age);
+        Assert.AreEqual("Jane", targets[1].Name);
+        Assert.AreEqual(25, targets[1].Age);
+    }
+
+    [TestMethod]
     public void Map_SimpleObject()
     {
         var source = new { Name = "John", Age = 30 };
