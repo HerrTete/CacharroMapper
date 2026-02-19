@@ -7,13 +7,13 @@
 
     <!-- NuGet Package Properties -->
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageId>HerrTete.EasyMapper</PackageId>
+    <PackageId>HerrTete.CacharroMapper</PackageId>
     <Version>1.0.0</Version>
     <Authors>HerrTete</Authors>
     <Company>HerrTete</Company>
     <Description>Dotnet object mapper</Description>
-    <PackageProjectUrl>https://github.com/HerrTete/EasyMapper</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/HerrTete/EasyMapper</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/HerrTete/CacharroMapper</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/HerrTete/CacharroMapper</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>

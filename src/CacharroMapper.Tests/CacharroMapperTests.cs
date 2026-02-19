@@ -1,13 +1,13 @@
-namespace EasyMapper.Tests;
+namespace CacharroMapper.Tests;
 
 [TestClass]
-public class EasyMapperTests
+public class CacharroMapperTests
 {
     [TestMethod]
     public void Map_SimpleObject()
     {
         var source = new { Name = "John", Age = 30 };
-        var target = EasyMapper.Map<SimpleTarget>(source);
+        var target = CacharroMapper.Map<SimpleTarget>(source);
         Assert.AreEqual("John", target.Name);
         Assert.AreEqual(30, target.Age);
     }
@@ -16,7 +16,7 @@ public class EasyMapperTests
     public void Map_SimpleObjectWithChild()
     {
         var source = new SimpleSource { Name = "John", Age = 30, Child = new SimpleSource { Name = "Jane", Age = 5 } };
-        var target = EasyMapper.Map<SimpleTarget>(source);
+        var target = CacharroMapper.Map<SimpleTarget>(source);
         Assert.AreEqual("John", target.Name);
         Assert.AreEqual(30, target.Age);
         Assert.IsNotNull(target.Child);
@@ -27,7 +27,7 @@ public class EasyMapperTests
     public void Map_SimpleObjectWithList()
     {
         var source = new SimpleSource { Name = "John", Age = 30, Child = new SimpleSource { Name = "Jane", Age = 5 }, Children = new List<SimpleSource> { new SimpleSource { Name = "Jack", Age = 3 } } };
-        var target = EasyMapper.Map<SimpleTarget>(source);
+        var target = CacharroMapper.Map<SimpleTarget>(source);
         Assert.AreEqual("John", target.Name);
         Assert.AreEqual(30, target.Age);
         Assert.IsNotNull(target.Child);
@@ -51,7 +51,7 @@ public class EasyMapperTests
                 new SimpleSource { Name = "Item2", Age = 20 }
             }
         };
-        var target = EasyMapper.Map<TargetWithArray>(source);
+        var target = CacharroMapper.Map<TargetWithArray>(source);
         Assert.AreEqual("John", target.Name);
         Assert.IsNotNull(target.Numbers);
         Assert.AreEqual(5, target.Numbers.Length);
@@ -82,7 +82,7 @@ public class EasyMapperTests
                 { "Second", new SimpleSource { Name = "SecondItem", Age = 25 } }
             }
         };
-        var target = EasyMapper.Map<TargetWithDictionary>(source);
+        var target = CacharroMapper.Map<TargetWithDictionary>(source);
         Assert.AreEqual("John", target.Name);
         Assert.IsNotNull(target.Properties);
         Assert.AreEqual(2, target.Properties.Count);
@@ -108,7 +108,7 @@ public class EasyMapperTests
                 new SimpleSource { Name = "IListItem2", Age = 40 }
             }
         };
-        var target = EasyMapper.Map<TargetWithIList>(source);
+        var target = CacharroMapper.Map<TargetWithIList>(source);
         Assert.AreEqual("John", target.Name);
         Assert.IsNotNull(target.Items);
         Assert.AreEqual(2, target.Items.Count);
@@ -127,7 +127,7 @@ public class EasyMapperTests
             Numbers = new int[0],
             Items = new SimpleSource[0]
         };
-        var target = EasyMapper.Map<TargetWithArray>(source);
+        var target = CacharroMapper.Map<TargetWithArray>(source);
         Assert.AreEqual("Empty", target.Name);
         Assert.IsNotNull(target.Numbers);
         Assert.AreEqual(0, target.Numbers.Length);
@@ -144,7 +144,7 @@ public class EasyMapperTests
             Properties = new Dictionary<string, string>(),
             ComplexDictionary = new Dictionary<string, SimpleSource>()
         };
-        var target = EasyMapper.Map<TargetWithDictionary>(source);
+        var target = CacharroMapper.Map<TargetWithDictionary>(source);
         Assert.AreEqual("Empty", target.Name);
         Assert.IsNotNull(target.Properties);
         Assert.AreEqual(0, target.Properties.Count);
@@ -160,7 +160,7 @@ public class EasyMapperTests
             Name = "Empty",
             Items = new List<SimpleSource>()
         };
-        var target = EasyMapper.Map<TargetWithIList>(source);
+        var target = CacharroMapper.Map<TargetWithIList>(source);
         Assert.AreEqual("Empty", target.Name);
         Assert.IsNotNull(target.Items);
         Assert.AreEqual(0, target.Items.Count);
@@ -168,13 +168,13 @@ public class EasyMapperTests
 }
 
 [TestClass]
-public class EasyMapperWithNameMappingTests
+public class CacharroMapperWithNameMappingTests
 {
     [TestMethod]
     public void Map_ObjectWithDifferentPropertyNames()
     {
         var source = new { FirstName = "John", Years = 30 };
-        var target = EasyMapper.Map<SimpleTarget>(source, new List<PropertyNameMapping>
+        var target = CacharroMapper.Map<SimpleTarget>(source, new List<PropertyNameMapping>
         {
             new PropertyNameMapping { SourcePropertyName = "FirstName", TargetPropertyName = "Name" },
             new PropertyNameMapping { SourcePropertyName = "Years", TargetPropertyName = "Age" }
@@ -243,13 +243,13 @@ public class TargetWithIList
 }
 
 [TestClass]
-public class EasyMapperEnumTests
+public class CacharroMapperEnumTests
 {
     [TestMethod]
     public void Map_EnumByName_SameEnumType()
     {
         var source = new SourceWithEnum { Name = "Test", Status = SourceStatus.Active };
-        var target = EasyMapper.Map<TargetWithEnum>(source);
+        var target = CacharroMapper.Map<TargetWithEnum>(source);
         Assert.AreEqual("Test", target.Name);
         Assert.AreEqual(TargetStatus.Active, target.Status);
     }
@@ -258,7 +258,7 @@ public class EasyMapperEnumTests
     public void Map_EnumByName_DifferentEnumTypes()
     {
         var source = new SourceWithEnum { Name = "Test", Status = SourceStatus.Inactive };
-        var target = EasyMapper.Map<TargetWithEnum>(source);
+        var target = CacharroMapper.Map<TargetWithEnum>(source);
         Assert.AreEqual("Test", target.Name);
         Assert.AreEqual(TargetStatus.Inactive, target.Status);
     }
@@ -268,7 +268,7 @@ public class EasyMapperEnumTests
     {
         // SourceStatus.Pending has value 2, TargetStatus.Pending has value 10
         var source = new SourceWithEnum { Name = "Test", Status = SourceStatus.Pending };
-        var target = EasyMapper.Map<TargetWithEnum>(source);
+        var target = CacharroMapper.Map<TargetWithEnum>(source);
         Assert.AreEqual("Test", target.Name);
         Assert.AreEqual(TargetStatus.Pending, target.Status);
         // Verify that we're mapping by name, not by int value
@@ -280,7 +280,7 @@ public class EasyMapperEnumTests
     public void Map_EnumByName_NonExistentValue()
     {
         var source = new SourceWithEnum { Name = "Test", Status = SourceStatus.Archived };
-        var target = EasyMapper.Map<TargetWithEnum>(source);
+        var target = CacharroMapper.Map<TargetWithEnum>(source);
         Assert.AreEqual("Test", target.Name);
         // Should map to default value (first enum value) when name doesn't exist
         Assert.AreEqual(default(TargetStatus), target.Status);
@@ -294,7 +294,7 @@ public class EasyMapperEnumTests
             Name = "Test",
             Statuses = new[] { SourceStatus.Active, SourceStatus.Pending, SourceStatus.Inactive }
         };
-        var target = EasyMapper.Map<TargetWithEnumArray>(source);
+        var target = CacharroMapper.Map<TargetWithEnumArray>(source);
         Assert.AreEqual("Test", target.Name);
         Assert.IsNotNull(target.Statuses);
         Assert.AreEqual(3, target.Statuses.Length);
@@ -311,7 +311,7 @@ public class EasyMapperEnumTests
             Name = "Test",
             Statuses = new List<SourceStatus> { SourceStatus.Active, SourceStatus.Inactive }
         };
-        var target = EasyMapper.Map<TargetWithEnumList>(source);
+        var target = CacharroMapper.Map<TargetWithEnumList>(source);
         Assert.AreEqual("Test", target.Name);
         Assert.IsNotNull(target.Statuses);
         Assert.AreEqual(2, target.Statuses.Count);

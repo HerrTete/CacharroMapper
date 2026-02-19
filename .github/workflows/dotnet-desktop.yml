@@ -36,25 +36,25 @@ jobs:
 
     # Restore dependencies
     - name: Restore dependencies
-      run: dotnet restore src/EasyMapper.sln
+      run: dotnet restore src/CacharroMapper.sln
 
     # Build the solution
     - name: Build
-      run: dotnet build src/EasyMapper.sln --configuration ${{ matrix.configuration }} --no-restore
+      run: dotnet build src/CacharroMapper.sln --configuration ${{ matrix.configuration }} --no-restore
 
     # Execute all unit tests in the solution
     - name: Test
-      run: dotnet test src/EasyMapper.sln --configuration ${{ matrix.configuration }} --no-build --verbosity normal
+      run: dotnet test src/CacharroMapper.sln --configuration ${{ matrix.configuration }} --no-build --verbosity normal
 
     # Pack the NuGet package (Release only)
     - name: Pack NuGet package
       if: matrix.configuration == 'Release' && github.event_name == 'push' && github.ref == 'refs/heads/main'
-      run: dotnet pack src/EasyMapper/EasyMapper.csproj --configuration Release --no-build --output nupkg
+      run: dotnet pack src/CacharroMapper/CacharroMapper.csproj --configuration Release --no-build --output nupkg
 
     # Publish to GitHub Packages (Release only, main branch)
     - name: Publish NuGet package to GitHub Packages
       if: matrix.configuration == 'Release' && github.event_name == 'push' && github.ref == 'refs/heads/main'
       run: |
-        Get-ChildItem -Recurse -Filter HerrTete.EasyMapper.*.nupkg | ForEach-Object {
+        Get-ChildItem -Recurse -Filter HerrTete.CacharroMapper.*.nupkg | ForEach-Object {
           dotnet nuget push $_.FullName --source "https://nuget.pkg.github.com/HerrTete/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
         }

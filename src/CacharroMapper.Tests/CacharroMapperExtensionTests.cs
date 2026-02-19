@@ -1,9 +1,9 @@
-using EasyMapper.EasyMapperExtension;
+using CacharroMapper;
 
-namespace EasyMapper.Tests;
+namespace CacharroMapper.Tests;
 
 [TestClass]
-public class EasyMapperExtensionTests
+public class CacharroMapperExtensionTests
 {
     [TestMethod]
     public void Map_SimpleObjectWithExtensionMethod()

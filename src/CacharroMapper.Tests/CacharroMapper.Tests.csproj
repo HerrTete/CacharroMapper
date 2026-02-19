@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EasyMapper\EasyMapper.csproj" />
+    <ProjectReference Include="..\CacharroMapper\CacharroMapper.csproj" />
   </ItemGroup>
 
 </Project>

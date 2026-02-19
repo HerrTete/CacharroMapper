@@ -1,9 +1,9 @@
 using System;
 using System.Reflection;
 
-namespace EasyMapper.EasyMapperExtension
+namespace CacharroMapper
 {
-    public static class EasyMapperExtension
+    public static class CacharroMapperExtension
     {
         public static TTarget Map<TTarget>(this object source) where TTarget : new()
         {
@@ -12,7 +12,7 @@ namespace EasyMapper.EasyMapperExtension
                 throw new ArgumentNullException(nameof(source));
             }
 
-            return EasyMapper.Map<TTarget>(source);
+            return CacharroMapper.Map<TTarget>(source);
         }
     }
 }
