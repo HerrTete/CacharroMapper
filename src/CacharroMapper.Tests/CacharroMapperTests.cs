@@ -367,12 +367,20 @@ public class SourceWithEnumArray
 {
     public string? Name { get; set; }
     public SourceStatus[]? Statuses { get; set; }
+
+    public string Hans { get; set; }
+
+    public SourceWithEnumList List { get; set; }
 }
 
 public class TargetWithEnumArray
 {
     public string? Name { get; set; }
     public TargetStatus[]? Statuses { get; set; }
+
+    public string Hans { get; set; }
+
+    public TargetWithEnumList List { get; set; }
 }
 
 public class SourceWithEnumList
@@ -731,4 +739,27 @@ public class SourceWithReadOnlyIndexer
     public string? Name { get; set; }
     private readonly string[] _data = ["a", "b"];
     public string this[int index] => _data[index];
+}
+
+
+
+[TestClass]
+public class CacharroMapperComplexListWithNullValuesTests
+{
+    [TestMethod]
+    public void Map_ObjectWithComplexTypesAndNull()
+    {
+        var source = new List<SourceWithEnumArray>
+        {
+            new SourceWithEnumArray
+            {
+                Name = "Test",
+                Statuses = null, // This should not cause an exception
+                Hans=null,
+                List = null
+            }
+        };
+        var target = CacharroMapper.Map<TargetWithEnumArray>(source);
+        Assert.AreEqual("Test", target.Name);
+    }
 }
