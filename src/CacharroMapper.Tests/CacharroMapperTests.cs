@@ -386,3 +386,304 @@ public class TargetWithEnumList
     public string? Name { get; set; }
     public List<TargetStatus>? Statuses { get; set; }
 }
+
+public class SourceItemWithTags
+{
+    public string? Name { get; set; }
+    public int Age { get; set; }
+    public string[]? Tags { get; set; }
+}
+
+public class TargetItemWithTags
+{
+    public string? Name { get; set; }
+    public int Age { get; set; }
+    public string[]? Tags { get; set; }
+}
+
+public class SourceWithComplexItemList
+{
+    public string? Name { get; set; }
+    public List<SourceItemWithTags>? Items { get; set; }
+}
+
+public class TargetWithComplexItemList
+{
+    public string? Name { get; set; }
+    public List<TargetItemWithTags>? Items { get; set; }
+}
+
+public class SourceWithDictionaryOfLists
+{
+    public string? Name { get; set; }
+    public Dictionary<string, List<SimpleSource>>? Groups { get; set; }
+}
+
+public class TargetWithDictionaryOfLists
+{
+    public string? Name { get; set; }
+    public Dictionary<string, List<SimpleTarget>>? Groups { get; set; }
+}
+
+public class SourceWithDictionaryOfArrays
+{
+    public string? Name { get; set; }
+    public Dictionary<string, SimpleSource[]>? Groups { get; set; }
+}
+
+public class TargetWithDictionaryOfArrays
+{
+    public string? Name { get; set; }
+    public Dictionary<string, SimpleTarget[]>? Groups { get; set; }
+}
+
+public class SourceWithListOfDictionaryOwners
+{
+    public string? Name { get; set; }
+    public List<SourceWithDictionary>? Items { get; set; }
+}
+
+public class TargetWithListOfDictionaryOwners
+{
+    public string? Name { get; set; }
+    public List<TargetWithDictionary>? Items { get; set; }
+}
+
+[TestClass]
+public class CacharroMapperCollectionCombinationTests
+{
+    [TestMethod]
+    public void MapList_WithComplexObjectsThatHaveChildren()
+    {
+        var sources = new List<SimpleSource>
+        {
+            new SimpleSource
+            {
+                Name = "Parent1", Age = 30,
+                Child = new SimpleSource { Name = "Child1", Age = 5 },
+                Children = new List<SimpleSource> { new SimpleSource { Name = "SubChild1", Age = 1 } }
+            },
+            new SimpleSource
+            {
+                Name = "Parent2", Age = 25,
+                Child = new SimpleSource { Name = "Child2", Age = 3 },
+                Children = new List<SimpleSource> { new SimpleSource { Name = "SubChild2", Age = 2 } }
+            }
+        };
+        var targets = CacharroMapper.MapList<SimpleTarget>(sources);
+        Assert.AreEqual(2, targets.Count);
+        Assert.AreEqual("Parent1", targets[0].Name);
+        Assert.IsNotNull(targets[0].Child);
+        Assert.AreEqual("Child1", targets[0].Child.Name);
+        Assert.IsNotNull(targets[0].Children);
+        Assert.AreEqual(1, targets[0].Children.Count);
+        Assert.AreEqual("SubChild1", targets[0].Children[0].Name);
+        Assert.AreEqual("Parent2", targets[1].Name);
+        Assert.IsNotNull(targets[1].Child);
+        Assert.AreEqual("Child2", targets[1].Child.Name);
+        Assert.IsNotNull(targets[1].Children);
+        Assert.AreEqual(1, targets[1].Children.Count);
+        Assert.AreEqual("SubChild2", targets[1].Children[0].Name);
+    }
+
+    [TestMethod]
+    public void Map_ArrayOfComplexObjectsWithNestedLists()
+    {
+        var source = new SourceWithArray
+        {
+            Name = "Root",
+            Numbers = new[] { 1, 2 },
+            Items = new SimpleSource[]
+            {
+                new SimpleSource
+                {
+                    Name = "Item1", Age = 10,
+                    Children = new List<SimpleSource> { new SimpleSource { Name = "Nested1", Age = 100 } }
+                },
+                new SimpleSource
+                {
+                    Name = "Item2", Age = 20,
+                    Children = new List<SimpleSource> { new SimpleSource { Name = "Nested2", Age = 200 } }
+                }
+            }
+        };
+        var target = CacharroMapper.Map<TargetWithArray>(source);
+        Assert.AreEqual("Root", target.Name);
+        Assert.IsNotNull(target.Items);
+        Assert.AreEqual(2, target.Items.Length);
+        Assert.AreEqual("Item1", target.Items[0].Name);
+        Assert.IsNotNull(target.Items[0].Children);
+        Assert.AreEqual(1, target.Items[0].Children.Count);
+        Assert.AreEqual("Nested1", target.Items[0].Children[0].Name);
+        Assert.AreEqual("Item2", target.Items[1].Name);
+        Assert.IsNotNull(target.Items[1].Children);
+        Assert.AreEqual(1, target.Items[1].Children.Count);
+        Assert.AreEqual("Nested2", target.Items[1].Children[0].Name);
+    }
+
+    [TestMethod]
+    public void Map_ListOfComplexObjectsWithNestedArrays()
+    {
+        var source = new SourceWithComplexItemList
+        {
+            Name = "Root",
+            Items = new List<SourceItemWithTags>
+            {
+                new SourceItemWithTags { Name = "Item1", Age = 10, Tags = new[] { "tag1", "tag2" } },
+                new SourceItemWithTags { Name = "Item2", Age = 20, Tags = new[] { "tag3" } }
+            }
+        };
+        var target = CacharroMapper.Map<TargetWithComplexItemList>(source);
+        Assert.AreEqual("Root", target.Name);
+        Assert.IsNotNull(target.Items);
+        Assert.AreEqual(2, target.Items.Count);
+        Assert.AreEqual("Item1", target.Items[0].Name);
+        Assert.IsNotNull(target.Items[0].Tags);
+        Assert.AreEqual(2, target.Items[0].Tags.Length);
+        Assert.AreEqual("tag1", target.Items[0].Tags[0]);
+        Assert.AreEqual("tag2", target.Items[0].Tags[1]);
+        Assert.AreEqual("Item2", target.Items[1].Name);
+        Assert.IsNotNull(target.Items[1].Tags);
+        Assert.AreEqual(1, target.Items[1].Tags.Length);
+        Assert.AreEqual("tag3", target.Items[1].Tags[0]);
+    }
+
+    [TestMethod]
+    public void Map_IListOfComplexObjectsWithNestedLists()
+    {
+        var source = new SourceWithIList
+        {
+            Name = "Root",
+            Items = new List<SimpleSource>
+            {
+                new SimpleSource
+                {
+                    Name = "Item1", Age = 10,
+                    Children = new List<SimpleSource> { new SimpleSource { Name = "NestedItem1", Age = 100 } }
+                }
+            }
+        };
+        var target = CacharroMapper.Map<TargetWithIList>(source);
+        Assert.AreEqual("Root", target.Name);
+        Assert.IsNotNull(target.Items);
+        Assert.AreEqual(1, target.Items.Count);
+        Assert.AreEqual("Item1", target.Items[0].Name);
+        Assert.IsNotNull(target.Items[0].Children);
+        Assert.AreEqual(1, target.Items[0].Children.Count);
+        Assert.AreEqual("NestedItem1", target.Items[0].Children[0].Name);
+    }
+
+    [TestMethod]
+    public void Map_DeeplyNestedObjects()
+    {
+        var source = new SimpleSource
+        {
+            Name = "Level1", Age = 1,
+            Child = new SimpleSource
+            {
+                Name = "Level2", Age = 2,
+                Child = new SimpleSource { Name = "Level3", Age = 3 },
+                Children = new List<SimpleSource> { new SimpleSource { Name = "Level2Child", Age = 20 } }
+            },
+            Children = new List<SimpleSource>
+            {
+                new SimpleSource
+                {
+                    Name = "Level1Child", Age = 10,
+                    Children = new List<SimpleSource> { new SimpleSource { Name = "Level1GrandChild", Age = 100 } }
+                }
+            }
+        };
+        var target = CacharroMapper.Map<SimpleTarget>(source);
+        Assert.AreEqual("Level1", target.Name);
+        Assert.AreEqual(1, target.Age);
+        Assert.IsNotNull(target.Child);
+        Assert.AreEqual("Level2", target.Child.Name);
+        Assert.IsNotNull(target.Child.Child);
+        Assert.AreEqual("Level3", target.Child.Child.Name);
+        Assert.AreEqual(3, target.Child.Child.Age);
+        Assert.IsNotNull(target.Child.Children);
+        Assert.AreEqual(1, target.Child.Children.Count);
+        Assert.AreEqual("Level2Child", target.Child.Children[0].Name);
+        Assert.IsNotNull(target.Children);
+        Assert.AreEqual(1, target.Children.Count);
+        Assert.AreEqual("Level1Child", target.Children[0].Name);
+        Assert.IsNotNull(target.Children[0].Children);
+        Assert.AreEqual(1, target.Children[0].Children.Count);
+        Assert.AreEqual("Level1GrandChild", target.Children[0].Children[0].Name);
+    }
+
+    [TestMethod]
+    public void Map_DictionaryWithListValues()
+    {
+        var source = new SourceWithDictionaryOfLists
+        {
+            Name = "Root",
+            Groups = new Dictionary<string, List<SimpleSource>>
+            {
+                { "Group1", new List<SimpleSource> { new SimpleSource { Name = "A", Age = 1 }, new SimpleSource { Name = "B", Age = 2 } } },
+                { "Group2", new List<SimpleSource> { new SimpleSource { Name = "C", Age = 3 } } }
+            }
+        };
+        var target = CacharroMapper.Map<TargetWithDictionaryOfLists>(source);
+        Assert.AreEqual("Root", target.Name);
+        Assert.IsNotNull(target.Groups);
+        Assert.AreEqual(2, target.Groups.Count);
+        Assert.AreEqual(2, target.Groups["Group1"].Count);
+        Assert.AreEqual("A", target.Groups["Group1"][0].Name);
+        Assert.AreEqual("B", target.Groups["Group1"][1].Name);
+        Assert.AreEqual(1, target.Groups["Group2"].Count);
+        Assert.AreEqual("C", target.Groups["Group2"][0].Name);
+    }
+
+    [TestMethod]
+    public void Map_DictionaryWithArrayValues()
+    {
+        var source = new SourceWithDictionaryOfArrays
+        {
+            Name = "Root",
+            Groups = new Dictionary<string, SimpleSource[]>
+            {
+                { "Group1", new SimpleSource[] { new SimpleSource { Name = "X", Age = 10 } } },
+                { "Group2", new SimpleSource[] { new SimpleSource { Name = "Y", Age = 20 }, new SimpleSource { Name = "Z", Age = 30 } } }
+            }
+        };
+        var target = CacharroMapper.Map<TargetWithDictionaryOfArrays>(source);
+        Assert.AreEqual("Root", target.Name);
+        Assert.IsNotNull(target.Groups);
+        Assert.AreEqual(2, target.Groups.Count);
+        Assert.AreEqual(1, target.Groups["Group1"].Length);
+        Assert.AreEqual("X", target.Groups["Group1"][0].Name);
+        Assert.AreEqual(2, target.Groups["Group2"].Length);
+        Assert.AreEqual("Y", target.Groups["Group2"][0].Name);
+        Assert.AreEqual("Z", target.Groups["Group2"][1].Name);
+    }
+
+    [TestMethod]
+    public void Map_ListOfObjectsWithDictionaryProperties()
+    {
+        var source = new SourceWithListOfDictionaryOwners
+        {
+            Name = "Root",
+            Items = new List<SourceWithDictionary>
+            {
+                new SourceWithDictionary
+                {
+                    Name = "Item1",
+                    Properties = new Dictionary<string, string> { { "Key1", "Val1" } },
+                    ComplexDictionary = new Dictionary<string, SimpleSource> { { "A", new SimpleSource { Name = "Nested", Age = 5 } } }
+                }
+            }
+        };
+        var target = CacharroMapper.Map<TargetWithListOfDictionaryOwners>(source);
+        Assert.AreEqual("Root", target.Name);
+        Assert.IsNotNull(target.Items);
+        Assert.AreEqual(1, target.Items.Count);
+        Assert.AreEqual("Item1", target.Items[0].Name);
+        Assert.IsNotNull(target.Items[0].Properties);
+        Assert.AreEqual("Val1", target.Items[0].Properties["Key1"]);
+        Assert.IsNotNull(target.Items[0].ComplexDictionary);
+        Assert.AreEqual("Nested", target.Items[0].ComplexDictionary["A"].Name);
+        Assert.AreEqual(5, target.Items[0].ComplexDictionary["A"].Age);
+    }
+}
