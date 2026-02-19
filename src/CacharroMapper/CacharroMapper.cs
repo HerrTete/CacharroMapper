@@ -33,7 +33,9 @@ public class CacharroMapper
             }
 
             var sourceProp = sourceType.GetProperty(sourcePropertyName);
-            if (sourceProp != null && sourceProp.CanRead && targetProp.CanWrite)
+            if (sourceProp != null && sourceProp.CanRead && targetProp.CanWrite
+                && sourceProp.GetIndexParameters().Length == 0
+                && targetProp.GetIndexParameters().Length == 0)
             {
                 var value = sourceProp.GetValue(source);
                 var mappedValue = MapValue(value, targetProp.PropertyType);
