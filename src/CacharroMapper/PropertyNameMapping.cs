@@ -2,6 +2,6 @@ namespace CacharroMapper;
 
 public class PropertyNameMapping
 {
-    public required string SourcePropertyName { get; set; }
-    public required string TargetPropertyName { get; set; }
+    public string SourcePropertyName { get; set; } = string.Empty;
+    public string TargetPropertyName { get; set; } = string.Empty;
 }
