@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace CacharroMapper;
@@ -22,17 +23,18 @@ public class CacharroMapper
         return result;
     }
 
-    public static T Map<T>(object source, List<PropertyNameMapping>? propertyNameMappings = null) where T : new()
+    public static T Map<T>(object source, List<PropertyNameMapping>? propertyNameMappings = null)
     {
-        var target = new T();
         var sourceType = source.GetType();
         var targetType = typeof(T);
 
-        // If source is a list/collection and target is also a list/collection, map the list
-        if (IsGenericList(sourceType) && IsGenericList(targetType))
+        // If source is a collection and target is also a collection, map the collection
+        if (IsAnyCollection(sourceType) && IsAnyCollection(targetType))
         {
-            return MapListToList<T>(source, targetType, propertyNameMappings);
+            return (T)MapCollectionToCollection(source, targetType, propertyNameMappings);
         }
+
+        var target = (T)Activator.CreateInstance(typeof(T))!;
 
         // If source is a list/collection but target is not, map the first element
         if (IsGenericList(sourceType))
@@ -101,16 +103,10 @@ public class CacharroMapper
             return Activator.CreateInstance(targetType)!;
         }
 
-        // Handle arrays (must be before IsAssignableFrom check)
-        if (targetType.IsArray && sourceType.IsArray)
+        // Handle collection types (arrays, lists, hashsets, etc.) with cross-collection support
+        if (IsAnyCollection(targetType) && IsAnyCollection(sourceType))
         {
-            return MapArray(value, targetType);
-        }
-
-        // Handle IList<T> and List<T> (must be before IsAssignableFrom check)
-        if (IsGenericList(targetType) && IsGenericList(sourceType))
-        {
-            return MapList(value, targetType);
+            return MapCollectionToCollection(value, targetType, propertyNameMappings);
         }
 
         // Handle Dictionary<TKey, TValue> (must be before IsAssignableFrom check)
@@ -201,6 +197,47 @@ public class CacharroMapper
         return targetDict;
     }
 
+    private static object MapCollectionToCollection(object source, Type targetType, List<PropertyNameMapping>? propertyNameMappings = null)
+    {
+        var sourceEnumerable = (IEnumerable)source;
+        var targetElementType = GetCollectionElementType(targetType);
+
+        var mappedElements = new List<object?>();
+        foreach (var element in sourceEnumerable)
+        {
+            mappedElements.Add(MapValue(element, targetElementType, propertyNameMappings));
+        }
+
+        if (targetType.IsArray)
+        {
+            var arr = Array.CreateInstance(targetElementType, mappedElements.Count);
+            for (int i = 0; i < mappedElements.Count; i++)
+                arr.SetValue(mappedElements[i], i);
+            return arr;
+        }
+
+        var genericTypeDef = targetType.IsGenericType ? targetType.GetGenericTypeDefinition() : null;
+
+        if (genericTypeDef == typeof(HashSet<>) || genericTypeDef == typeof(ISet<>))
+        {
+            var hashSetType = typeof(HashSet<>).MakeGenericType(targetElementType);
+            var set = Activator.CreateInstance(hashSetType)!;
+            var addMethod = hashSetType.GetMethod("Add")!;
+            foreach (var element in mappedElements)
+                addMethod.Invoke(set, new[] { element });
+            return set;
+        }
+
+        // Default: List<T> for List<>, IList<>, ICollection<>, IEnumerable<>
+        var listType = targetType.IsInterface
+            ? typeof(List<>).MakeGenericType(targetElementType)
+            : targetType;
+        var list = (IList)Activator.CreateInstance(listType)!;
+        foreach (var element in mappedElements)
+            list.Add(element);
+        return list;
+    }
+
     private static T MapListToList<T>(object sourceList, Type targetType, List<PropertyNameMapping>? propertyNameMappings) where T : new()
     {
         var sourceEnumerable = (IEnumerable)sourceList;
@@ -242,5 +279,24 @@ public class CacharroMapper
         var genericTypeDef = type.GetGenericTypeDefinition();
         return genericTypeDef == typeof(Dictionary<,>) || 
                genericTypeDef == typeof(IDictionary<,>);
+    }
+
+    private static bool IsAnyCollection(Type type)
+    {
+        if (type.IsArray) return true;
+        if (!type.IsGenericType) return false;
+        var genericTypeDef = type.GetGenericTypeDefinition();
+        return genericTypeDef == typeof(List<>) ||
+               genericTypeDef == typeof(IList<>) ||
+               genericTypeDef == typeof(ICollection<>) ||
+               genericTypeDef == typeof(IEnumerable<>) ||
+               genericTypeDef == typeof(HashSet<>) ||
+               genericTypeDef == typeof(ISet<>);
+    }
+
+    private static Type GetCollectionElementType(Type type)
+    {
+        if (type.IsArray) return type.GetElementType()!;
+        return type.GetGenericArguments()[0];
     }
 }

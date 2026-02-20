@@ -816,3 +816,341 @@ public class CacharroMapperComplexListWithNullValuesTests
         public string? City { get; set; }
     }
 }
+
+// Models for cross-collection mapping tests
+public class SourceWithIntArrayProp
+{
+    public string? Name { get; set; }
+    public int[]? Numbers { get; set; }
+    public SimpleSource[]? Items { get; set; }
+}
+
+public class TargetWithIntListProp
+{
+    public string? Name { get; set; }
+    public List<int>? Numbers { get; set; }
+    public List<SimpleTarget>? Items { get; set; }
+}
+
+public class SourceWithIntListProp
+{
+    public string? Name { get; set; }
+    public List<int>? Numbers { get; set; }
+    public List<SimpleSource>? Items { get; set; }
+}
+
+public class TargetWithIntArrayProp
+{
+    public string? Name { get; set; }
+    public int[]? Numbers { get; set; }
+    public SimpleTarget[]? Items { get; set; }
+}
+
+public class SourceWithHashSetProp
+{
+    public string? Name { get; set; }
+    public HashSet<string>? Tags { get; set; }
+    public HashSet<int>? Numbers { get; set; }
+    public HashSet<SimpleSource>? Items { get; set; }
+}
+
+public class TargetWithHashSetProp
+{
+    public string? Name { get; set; }
+    public HashSet<string>? Tags { get; set; }
+    public HashSet<int>? Numbers { get; set; }
+    public HashSet<SimpleTarget>? Items { get; set; }
+}
+
+public class TargetWithArrayFromHashSet
+{
+    public string? Name { get; set; }
+    public string[]? Tags { get; set; }
+    public int[]? Numbers { get; set; }
+}
+
+public class TargetWithListFromHashSet
+{
+    public string? Name { get; set; }
+    public List<string>? Tags { get; set; }
+    public List<int>? Numbers { get; set; }
+}
+
+public class SourceWithStringArrayProp
+{
+    public string? Name { get; set; }
+    public string[]? Tags { get; set; }
+}
+
+public class TargetWithHashSetFromArray
+{
+    public string? Name { get; set; }
+    public HashSet<string>? Tags { get; set; }
+}
+
+public class TargetWithHashSetFromList
+{
+    public string? Name { get; set; }
+    public HashSet<string>? Tags { get; set; }
+}
+
+public class SourceWithStringListProp
+{
+    public string? Name { get; set; }
+    public List<string>? Tags { get; set; }
+}
+
+[TestClass]
+public class CacharroMapperCrossCollectionTests
+{
+    // Array → List
+
+    [TestMethod]
+    public void Map_ArrayToList_Primitives()
+    {
+        var source = new SourceWithIntArrayProp { Name = "Test", Numbers = new[] { 1, 2, 3 } };
+        var target = CacharroMapper.Map<TargetWithIntListProp>(source);
+        Assert.AreEqual("Test", target.Name);
+        Assert.IsNotNull(target.Numbers);
+        Assert.AreEqual(3, target.Numbers.Count);
+        Assert.AreEqual(1, target.Numbers[0]);
+        Assert.AreEqual(2, target.Numbers[1]);
+        Assert.AreEqual(3, target.Numbers[2]);
+    }
+
+    [TestMethod]
+    public void Map_ArrayToList_ComplexObjects()
+    {
+        var source = new SourceWithIntArrayProp
+        {
+            Name = "Test",
+            Numbers = new[] { 10 },
+            Items = new SimpleSource[]
+            {
+                new SimpleSource { Name = "A", Age = 1 },
+                new SimpleSource { Name = "B", Age = 2 }
+            }
+        };
+        var target = CacharroMapper.Map<TargetWithIntListProp>(source);
+        Assert.IsNotNull(target.Items);
+        Assert.AreEqual(2, target.Items.Count);
+        Assert.AreEqual("A", target.Items[0].Name);
+        Assert.AreEqual(1, target.Items[0].Age);
+        Assert.AreEqual("B", target.Items[1].Name);
+        Assert.AreEqual(2, target.Items[1].Age);
+    }
+
+    [TestMethod]
+    public void Map_ArrayToList_Empty()
+    {
+        var source = new SourceWithIntArrayProp { Name = "Empty", Numbers = new int[0] };
+        var target = CacharroMapper.Map<TargetWithIntListProp>(source);
+        Assert.IsNotNull(target.Numbers);
+        Assert.AreEqual(0, target.Numbers.Count);
+    }
+
+    // List → Array
+
+    [TestMethod]
+    public void Map_ListToArray_Primitives()
+    {
+        var source = new SourceWithIntListProp { Name = "Test", Numbers = new List<int> { 4, 5, 6 } };
+        var target = CacharroMapper.Map<TargetWithIntArrayProp>(source);
+        Assert.AreEqual("Test", target.Name);
+        Assert.IsNotNull(target.Numbers);
+        Assert.AreEqual(3, target.Numbers.Length);
+        Assert.AreEqual(4, target.Numbers[0]);
+        Assert.AreEqual(5, target.Numbers[1]);
+        Assert.AreEqual(6, target.Numbers[2]);
+    }
+
+    [TestMethod]
+    public void Map_ListToArray_ComplexObjects()
+    {
+        var source = new SourceWithIntListProp
+        {
+            Name = "Test",
+            Numbers = new List<int> { 1 },
+            Items = new List<SimpleSource>
+            {
+                new SimpleSource { Name = "X", Age = 10 },
+                new SimpleSource { Name = "Y", Age = 20 }
+            }
+        };
+        var target = CacharroMapper.Map<TargetWithIntArrayProp>(source);
+        Assert.IsNotNull(target.Items);
+        Assert.AreEqual(2, target.Items.Length);
+        Assert.AreEqual("X", target.Items[0].Name);
+        Assert.AreEqual(10, target.Items[0].Age);
+        Assert.AreEqual("Y", target.Items[1].Name);
+        Assert.AreEqual(20, target.Items[1].Age);
+    }
+
+    [TestMethod]
+    public void Map_ListToArray_Empty()
+    {
+        var source = new SourceWithIntListProp { Name = "Empty", Numbers = new List<int>() };
+        var target = CacharroMapper.Map<TargetWithIntArrayProp>(source);
+        Assert.IsNotNull(target.Numbers);
+        Assert.AreEqual(0, target.Numbers.Length);
+    }
+
+    // HashSet → Array
+
+    [TestMethod]
+    public void Map_HashSetToArray_Primitives()
+    {
+        var source = new SourceWithHashSetProp { Name = "Test", Tags = new HashSet<string> { "a", "b", "c" } };
+        var target = CacharroMapper.Map<TargetWithArrayFromHashSet>(source);
+        Assert.AreEqual("Test", target.Name);
+        Assert.IsNotNull(target.Tags);
+        Assert.AreEqual(3, target.Tags.Length);
+        CollectionAssert.AreEquivalent(new[] { "a", "b", "c" }, target.Tags);
+    }
+
+    [TestMethod]
+    public void Map_HashSetToArray_Empty()
+    {
+        var source = new SourceWithHashSetProp { Name = "Empty", Tags = new HashSet<string>() };
+        var target = CacharroMapper.Map<TargetWithArrayFromHashSet>(source);
+        Assert.IsNotNull(target.Tags);
+        Assert.AreEqual(0, target.Tags.Length);
+    }
+
+    // Array → HashSet
+
+    [TestMethod]
+    public void Map_ArrayToHashSet_Primitives()
+    {
+        var source = new SourceWithStringArrayProp { Name = "Test", Tags = new[] { "x", "y", "z" } };
+        var target = CacharroMapper.Map<TargetWithHashSetFromArray>(source);
+        Assert.AreEqual("Test", target.Name);
+        Assert.IsNotNull(target.Tags);
+        Assert.AreEqual(3, target.Tags.Count);
+        Assert.IsTrue(target.Tags.Contains("x"));
+        Assert.IsTrue(target.Tags.Contains("y"));
+        Assert.IsTrue(target.Tags.Contains("z"));
+    }
+
+    [TestMethod]
+    public void Map_ArrayToHashSet_Empty()
+    {
+        var source = new SourceWithStringArrayProp { Name = "Empty", Tags = new string[0] };
+        var target = CacharroMapper.Map<TargetWithHashSetFromArray>(source);
+        Assert.IsNotNull(target.Tags);
+        Assert.AreEqual(0, target.Tags.Count);
+    }
+
+    // HashSet → List
+
+    [TestMethod]
+    public void Map_HashSetToList_Primitives()
+    {
+        var source = new SourceWithHashSetProp { Name = "Test", Tags = new HashSet<string> { "one", "two" } };
+        var target = CacharroMapper.Map<TargetWithListFromHashSet>(source);
+        Assert.AreEqual("Test", target.Name);
+        Assert.IsNotNull(target.Tags);
+        Assert.AreEqual(2, target.Tags.Count);
+        CollectionAssert.AreEquivalent(new[] { "one", "two" }, target.Tags);
+    }
+
+    [TestMethod]
+    public void Map_HashSetToList_Empty()
+    {
+        var source = new SourceWithHashSetProp { Name = "Empty", Tags = new HashSet<string>() };
+        var target = CacharroMapper.Map<TargetWithListFromHashSet>(source);
+        Assert.IsNotNull(target.Tags);
+        Assert.AreEqual(0, target.Tags.Count);
+    }
+
+    // List → HashSet
+
+    [TestMethod]
+    public void Map_ListToHashSet_Primitives()
+    {
+        var source = new SourceWithStringListProp { Name = "Test", Tags = new List<string> { "foo", "bar" } };
+        var target = CacharroMapper.Map<TargetWithHashSetFromList>(source);
+        Assert.AreEqual("Test", target.Name);
+        Assert.IsNotNull(target.Tags);
+        Assert.AreEqual(2, target.Tags.Count);
+        Assert.IsTrue(target.Tags.Contains("foo"));
+        Assert.IsTrue(target.Tags.Contains("bar"));
+    }
+
+    [TestMethod]
+    public void Map_ListToHashSet_Empty()
+    {
+        var source = new SourceWithStringListProp { Name = "Empty", Tags = new List<string>() };
+        var target = CacharroMapper.Map<TargetWithHashSetFromList>(source);
+        Assert.IsNotNull(target.Tags);
+        Assert.AreEqual(0, target.Tags.Count);
+    }
+
+    // Direct Map<T> calls where T is a collection type
+
+    [TestMethod]
+    public void Map_DirectArrayToList()
+    {
+        int[] sourceArr = new[] { 10, 20, 30 };
+        var result = CacharroMapper.Map<List<int>>(sourceArr);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(3, result.Count);
+        Assert.AreEqual(10, result[0]);
+        Assert.AreEqual(20, result[1]);
+        Assert.AreEqual(30, result[2]);
+    }
+
+    [TestMethod]
+    public void Map_DirectListToArray()
+    {
+        var sourceList = new List<string> { "alpha", "beta" };
+        var result = CacharroMapper.Map<string[]>(sourceList);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(2, result.Length);
+        Assert.AreEqual("alpha", result[0]);
+        Assert.AreEqual("beta", result[1]);
+    }
+
+    [TestMethod]
+    public void Map_DirectListToHashSet()
+    {
+        var sourceList = new List<string> { "p", "q", "r" };
+        var result = CacharroMapper.Map<HashSet<string>>(sourceList);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(3, result.Count);
+        Assert.IsTrue(result.Contains("p"));
+        Assert.IsTrue(result.Contains("q"));
+        Assert.IsTrue(result.Contains("r"));
+    }
+
+    [TestMethod]
+    public void Map_DirectHashSetToArray()
+    {
+        var sourceSet = new HashSet<int> { 7, 8, 9 };
+        var result = CacharroMapper.Map<int[]>(sourceSet);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(3, result.Length);
+        CollectionAssert.AreEquivalent(new[] { 7, 8, 9 }, result);
+    }
+
+    [TestMethod]
+    public void Map_DirectHashSetToList()
+    {
+        var sourceSet = new HashSet<int> { 1, 2 };
+        var result = CacharroMapper.Map<List<int>>(sourceSet);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(2, result.Count);
+        CollectionAssert.AreEquivalent(new[] { 1, 2 }, result);
+    }
+
+    [TestMethod]
+    public void Map_DirectArrayToHashSet()
+    {
+        string[] sourceArr = new[] { "m", "n" };
+        var result = CacharroMapper.Map<HashSet<string>>(sourceArr);
+        Assert.IsNotNull(result);
+        Assert.AreEqual(2, result.Count);
+        Assert.IsTrue(result.Contains("m"));
+        Assert.IsTrue(result.Contains("n"));
+    }
+}
